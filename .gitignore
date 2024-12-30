@@ -1,0 +1,144 @@
+examples/test
+
+# ============================
+# C++ Project .gitignore Template
+# ============================
+
+# ----------------------------
+# Compiled Object files
+# ----------------------------
+*.o
+*.obj
+*.lo
+*.slo
+*.dll
+*.so
+*.dylib
+
+# ----------------------------
+# Precompiled Headers
+# ----------------------------
+*.gch
+*.pch
+
+# ----------------------------
+# Executables
+# ----------------------------
+*.exe
+*.out
+*.app
+example
+
+# ----------------------------
+# Static Libraries
+# ----------------------------
+*.a
+*.lib
+liboutline.a
+liboutline.so
+
+# ----------------------------
+# Dynamic Libraries
+# ----------------------------
+*.dll
+*.so
+*.dylib
+
+# ----------------------------
+# CMake Build Directory
+# ----------------------------
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+/*.cmake
+
+# ----------------------------
+# Makefile generated files
+# ----------------------------
+/obj/
+/lib/
+
+# ----------------------------
+# IDE and Editor Configurations
+# ----------------------------
+
+# Visual Studio Code
+.vscode/
+
+# CLion
+.idea/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+
+# Eclipse
+.project
+.cproject
+.settings/
+
+# Visual Studio
+*.sln
+*.vcxproj*
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim swap files
+*.swp
+
+# ----------------------------
+# Temporary and Backup Files
+# ----------------------------
+*~
+*.tmp
+*.bak
+*.backup
+*.old
+
+# ----------------------------
+# Logs
+# ----------------------------
+*.log
+
+# ----------------------------
+# OS Specific Files
+# ----------------------------
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ----------------------------
+# Coverage Reports
+# ----------------------------
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# ----------------------------
+# Test Results
+# ----------------------------
+/tests/*.test
+
+# ----------------------------
+# Dependency Directories
+# ----------------------------
+/deps/
