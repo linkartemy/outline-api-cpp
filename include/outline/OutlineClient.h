@@ -47,11 +47,94 @@ class OutlineClient {
      */
   ~OutlineClient();
 
+  /**
+     * @brief Returns the access keys.
+     * @return the access keys.
+     */
   std::string getAccessKeys();
+  /**
+   * @brief Returns the access key by id.
+   * @param accessKeyId - the access key id.
+   * @return the access key by id.
+   */
   std::string getAccessKey(std::string& accessKeyId);
+  /**
+   * @brief Creates the access key.
+   * @param params - the parameters for the access key.
+   */
   std::string createAccessKey(CreateAccessKeyParams& params);
+  /**
+   * @brief Updates the access key.
+   * @param accessKeyId - the access key id.
+   * @param params - the parameters for the access key.
+   */
   std::string updateAccessKey(int accessKeyId, UpdateAccessKeyParams& params);
+  /**
+   * @brief Deletes the access key.
+   * @param accessKeyId - the access key id.
+   */
   void deleteAccessKey(std::string& accessKeyId);
+  /**
+   * @brief Renames the access key.
+   * @param accessKeyId - the access key id.
+   * @param newName - the new name for the access key.
+   */
+  void renameAccessKey(std::string& accessKeyId, std::string& newName);
+  /**
+   * @brief Adds the data limit for the access key.
+   * @param accessKeyId - the access key id.
+   * @param dataLimitBytes - the data limit in bytes.
+   */
+  void addDataLimit(std::string& accessKeyId, int dataLimitBytes);
+  /**
+   * @brief Deletes the data limit for the access key.
+   * @param accessKeyId - the access key id.
+   */
+  void deleteDataLimit(std::string& accessKeyId);
+  /**
+   * @brief Returns the metrics of the server.
+   * @return the metrics of the server.
+   */
+  std::string getMetrics();
+  /**
+   * @details Example: name, serverId, metricsEnabled, createdTimestampMs, version, accessKeyDataLimit, portForNewAccessKeys, hostnameForAccessKeys
+   * @brief Returns the information about the server.
+   * @return the information about the server.
+   */
+  std::string getServerInformation();
+  /**
+   * @brief Sets the server name.
+   */
+  void setServerName(std::string& serverName);
+  /**
+   * @brief Sets the host name for the server.
+   * @param hostName - the host name, which will be used for the server.
+   */
+  void setHostName(std::string& hostName);
+  /**
+     * @brief Returns the status of metrics.
+     * @return true if metrics are enabled, false otherwise.
+     */
+  bool getMetricsStatus();
+  /**
+     * @brief Sets the status of metrics.
+     * @param status - true if metrics are enabled, false otherwise.
+     */
+  void setMetricsStatus(bool status);
+  /**
+     * @brief Sets the default port for new access keys.
+     * @param port - the default port, which will be used for new access keys.
+     */
+  void setDefaultPort(int port);
+  /**
+     * @brief Sets the data limit for all access keys.
+     * @param dataLimitBytes - the data limit in bytes.
+     */
+  void setDataLimitForAllAccessKeys(int dataLimitBytes);
+  /**
+     * @brief Deletes the data limit for all access keys.
+     */
+  void deleteDataLimitForAllAccessKeys();
 
  private:
   boost::urls::url m_apiUrl;
@@ -71,8 +154,8 @@ class OutlineClient {
                                      const std::string& body);
   std::pair<int, std::string> doHttpsPost(const boost::urls::url& url,
                                           const std::string& body);
-   std::pair<int, std::string> doDelete(const boost::urls::url& url);
-   std::pair<int, std::string> doHttpsDelete(const boost::urls::url& url);
+  std::pair<int, std::string> doDelete(const boost::urls::url& url);
+  std::pair<int, std::string> doHttpsDelete(const boost::urls::url& url);
 
   boost::asio::ssl::context m_sslContext;
   boost::asio::ssl::stream<boost::asio::ip::tcp::socket> m_sslStream;

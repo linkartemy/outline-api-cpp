@@ -184,6 +184,207 @@ void OutlineClient::deleteAccessKey(std::string& accessKeyId) {
   }
 }
 
+void OutlineClient::renameAccessKey(std::string& accessKeyId,
+                                    std::string& newName) {
+  std::map<std::string, std::string> placeholders;
+  placeholders[std::string(api::UrlParams::KeyId)] = accessKeyId;
+  std::string endpoint = utils::replacePlaceholders(
+      std::string(api::Endpoints::RenameAccessKey), placeholders);
+  m_apiUrl = utils::appendUrl(m_apiUrl, endpoint);
+
+  boost::json::object keyObj;
+  keyObj["name"] = newName;
+  std::string keyStr = boost::json::serialize(keyObj);
+  auto [statusKey, bodyKey] = doPut(m_apiUrl, keyStr);
+
+  if (statusKey != 204) {
+    throw OutlineServerErrorException(
+        "Unable to rename key (status=" + std::to_string(statusKey) + ")");
+  }
+}
+
+void OutlineClient::addDataLimit(std::string& accessKeyId, int dataLimitBytes) {
+  std::map<std::string, std::string> placeholders;
+  placeholders[std::string(api::UrlParams::KeyId)] = accessKeyId;
+  std::string endpoint = utils::replacePlaceholders(
+      std::string(api::Endpoints::AddDataLimit), placeholders);
+  m_apiUrl = utils::appendUrl(m_apiUrl, endpoint);
+
+  boost::json::object dataLimitObj;
+  dataLimitObj["bytes"] = dataLimitBytes;
+  std::string dataLimitStr = boost::json::serialize(dataLimitObj);
+  auto [statusKey, bodyKey] = doPut(m_apiUrl, dataLimitStr);
+
+  if (statusKey != 204) {
+    throw OutlineServerErrorException(
+        "Unable to add data limit (status=" + std::to_string(statusKey) + ")");
+  }
+}
+
+void OutlineClient::deleteDataLimit(std::string& accessKeyId) {
+  std::map<std::string, std::string> placeholders;
+  placeholders[std::string(api::UrlParams::KeyId)] = accessKeyId;
+  std::string endpoint = utils::replacePlaceholders(
+      std::string(api::Endpoints::DeleteDataLimit), placeholders);
+  m_apiUrl = utils::appendUrl(m_apiUrl, endpoint);
+  auto [statusKey, bodyKey] = doDelete(m_apiUrl);
+
+  if (statusKey != 204) {
+    throw OutlineServerErrorException(
+        "Unable to delete data limit (status=" + std::to_string(statusKey) +
+        ")");
+  }
+}
+
+std::string OutlineClient::getMetrics() {
+  m_apiUrl =
+      utils::appendUrl(m_apiUrl, std::string(api::Endpoints::GetMetrics));
+  auto [statusMetrics, bodyMetrics] = doGet(m_apiUrl);
+
+  if (statusMetrics >= 400 || bodyMetrics.find("bytesTransferredByUserId") == std::string::npos) {
+    throw OutlineServerErrorException(
+        "Unable to get metrics (status=" + std::to_string(statusMetrics) + ")");
+  }
+
+  boost::json::value metricsVal;
+  try {
+    metricsVal = boost::json::parse(bodyMetrics);
+  } catch (const std::exception& e) {
+    throw OutlineParseException(std::string("JSON parse error for metrics: ") +
+                                e.what());
+  }
+
+  return boost::json::serialize(metricsVal);
+}
+
+std::string OutlineClient::getServerInformation() {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::GetServerInformation));
+  auto [statusServer, bodyServer] = doGet(m_apiUrl);
+
+  if (statusServer != 200) {
+    throw OutlineServerErrorException(
+        "Unable to get server information (status=" + std::to_string(statusServer) + ")");
+  }
+
+  boost::json::value serverVal;
+  try {
+    serverVal = boost::json::parse(bodyServer);
+  } catch (const std::exception& e) {
+    throw OutlineParseException(std::string("JSON parse error for server: ") +
+                                e.what());
+  }
+
+  return boost::json::serialize(serverVal);
+}
+
+void OutlineClient::setServerName(std::string& serverName) {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::SetServerName));
+
+  boost::json::object serverObj;
+  serverObj["name"] = serverName;
+  std::string serverStr = boost::json::serialize(serverObj);
+  auto [statusServer, bodyServer] = doPut(m_apiUrl, serverStr);
+
+  if (statusServer != 204) {
+    throw OutlineServerErrorException(
+        "Unable to set server name (status=" + std::to_string(statusServer) + ")");
+  }
+}
+
+void OutlineClient::setHostName(std::string& hostName) {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::SetHostName));
+
+  boost::json::object serverObj;
+  serverObj["hostname"] = hostName;
+  std::string serverStr = boost::json::serialize(serverObj);
+  auto [statusServer, bodyServer] = doPut(m_apiUrl, serverStr);
+
+  if (statusServer != 204) {
+    throw OutlineServerErrorException(
+        "Unable to set host name (status=" + std::to_string(statusServer) + ")");
+  }
+}
+
+bool OutlineClient::getMetricsStatus() {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::GetMetricsStatus));
+  auto [statusMetrics, bodyMetrics] = doGet(m_apiUrl);
+
+  if (statusMetrics != 200) {
+    throw OutlineServerErrorException(
+        "Unable to get metrics status (status=" + std::to_string(statusMetrics) + ")");
+  }
+
+  boost::json::value metricsVal;
+  try {
+    metricsVal = boost::json::parse(bodyMetrics);
+  } catch (const std::exception& e) {
+    throw OutlineParseException(std::string("JSON parse error for metrics: ") +
+                                e.what());
+  }
+
+  return metricsVal.as_object()["metricsEnabled"].as_bool();
+}
+
+void OutlineClient::setMetricsStatus(bool status) {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::SetMetricsStatus));
+
+  boost::json::object metricsObj;
+  metricsObj["metricsEnabled"] = status;
+  std::string metricsStr = boost::json::serialize(metricsObj);
+  auto [statusMetrics, bodyMetrics] = doPut(m_apiUrl, metricsStr);
+
+  if (statusMetrics != 204) {
+    throw OutlineServerErrorException(
+        "Unable to set metrics status (status=" + std::to_string(statusMetrics) + ")");
+  }
+}
+
+void OutlineClient::setDefaultPort(int port) {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::SetDefaultPort));
+
+  boost::json::object portObj;
+  portObj["port"] = port;
+  std::string portStr = boost::json::serialize(portObj);
+  auto [statusPort, bodyPort] = doPut(m_apiUrl, portStr);
+
+  if (statusPort == 400) {
+    throw OutlineServerErrorException(
+        "The requested port isn't an integer from 1 through 65535, or the request had no port parameter.");
+  }
+  if (statusPort == 409) {
+    throw OutlineServerErrorException(
+        "The requested port is already in use.");
+  }
+  if (statusPort != 204) {
+    throw OutlineServerErrorException(
+        "Unable to set default port (status=" + std::to_string(statusPort) + ")");
+  }
+}
+
+void OutlineClient::setDataLimitForAllAccessKeys(int dataLimitBytes) {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::SetDataLimitForAllAccessKeys));
+
+  boost::json::object dataLimitObj;
+  dataLimitObj["bytes"] = dataLimitBytes;
+  std::string dataLimitStr = boost::json::serialize(dataLimitObj);
+  auto [statusDataLimit, bodyDataLimit] = doPut(m_apiUrl, dataLimitStr);
+
+  if (statusDataLimit != 204) {
+    throw OutlineServerErrorException(
+        "Unable to set data limit for all access keys (status=" + std::to_string(statusDataLimit) + ")");
+  }
+}
+
+void OutlineClient::deleteDataLimitForAllAccessKeys() {
+  m_apiUrl = utils::appendUrl(m_apiUrl, std::string(api::Endpoints::deleteDataLimitForAllAccessKeys));
+  auto [statusDataLimit, bodyDataLimit] = doDelete(m_apiUrl);
+
+  if (statusDataLimit != 204) {
+    throw OutlineServerErrorException(
+        "Unable to delete data limit for all access keys (status=" + std::to_string(statusDataLimit) + ")");
+  }
+}
+
 std::pair<int, std::string> OutlineClient::doGet(const boost::urls::url& url) {
   return doHttpsGet(url);
 }
