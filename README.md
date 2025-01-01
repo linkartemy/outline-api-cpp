@@ -47,8 +47,8 @@ Ensure you have the following dependencies installed:
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/linkartemy/outline-api-cpp.git
-   cd outline-api-cpp
+   git clone https://github.com/linkartemy/outline-vpn-api.git
+   cd outline-vpn-api
    ```
 
 2. **Build the Project**
