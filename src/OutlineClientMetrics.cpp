@@ -80,4 +80,20 @@ std::future<void> OutlineClient::setMetricsStatusAsync(bool status) {
       },
       boost::asio::use_future);
 }
+
+std::string OutlineClient::getMetrics() {
+    return getMetricsAsync().get();
+}
+
+std::string OutlineClient::getServerInformation() {
+    return getServerInformationAsync().get();
+}
+
+bool OutlineClient::getMetricsStatus() {
+    return getMetricsStatusAsync().get();
+}
+
+void OutlineClient::setMetricsStatus(bool status) {
+    setMetricsStatusAsync(status).get();
+}
 }  // namespace outline

@@ -152,7 +152,7 @@ class OutlineClient : public std::enable_shared_from_this<OutlineClient> {
   std::string getAccessKeys();
   std::string getAccessKey(const std::string& accessKeyId);
   std::string createAccessKey(const CreateAccessKeyParams& params);
-  std::string updateAccessKey(int accessKeyId,
+  std::string updateAccessKey(const std::string& accessKeyId,
                               const UpdateAccessKeyParams& params);
   void deleteAccessKey(const std::string& accessKeyId);
   void renameAccessKey(const std::string& accessKeyId,

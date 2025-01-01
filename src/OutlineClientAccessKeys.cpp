@@ -230,4 +230,37 @@ std::future<void> OutlineClient::deleteDataLimitAsync(
       },
       boost::asio::use_future);
 }
+
+std::string OutlineClient::getAccessKeys() {
+    return getAccessKeysAsync().get();
+}
+
+std::string OutlineClient::getAccessKey(const std::string& accessKeyId) {
+    return getAccessKeyAsync(accessKeyId).get();
+}
+
+std::string OutlineClient::createAccessKey(const CreateAccessKeyParams& params) {
+    return createAccessKeyAsync(params).get();
+}
+
+std::string OutlineClient::updateAccessKey(const std::string& accessKeyId, const UpdateAccessKeyParams& params) {
+    return updateAccessKeyAsync(accessKeyId, params).get();
+}
+
+void OutlineClient::deleteAccessKey(const std::string& accessKeyId) {
+    deleteAccessKeyAsync(accessKeyId).get();
+}
+
+void OutlineClient::renameAccessKey(const std::string& accessKeyId, const std::string& newName) {
+    renameAccessKeyAsync(accessKeyId, newName).get();
+}
+
+void OutlineClient::addDataLimit(const std::string& accessKeyId, int dataLimitBytes) {
+    addDataLimitAsync(accessKeyId, dataLimitBytes).get();
+}
+
+void OutlineClient::deleteDataLimit(const std::string& accessKeyId) {
+    deleteDataLimitAsync(accessKeyId).get();
+}
+
 }  // namespace outline

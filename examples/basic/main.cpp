@@ -10,8 +10,7 @@ int main() {
     auto client = outline::OutlineClient::create(host, cert, timeout);
 
     try {
-        auto future = client->getServerInformationAsync();
-        std::string info = future.get();
+        auto response = client->getServerInformation();
         /*
         Prints the server information:
         Server info: {"name":"Server Outline",
@@ -22,7 +21,7 @@ int main() {
         "portForNewAccessKeys":Port,
         "hostnameForAccessKeys":"IP"}
         */
-        std::cout << "Server info: " << info << std::endl;
+        std::cout << "Server info: " << response << std::endl;
     } catch(const outline::OutlineServerErrorException& e) {
         std::cerr << "Server Error: " << e.what() << std::endl;
     } catch(const outline::OutlineParseException& e) {

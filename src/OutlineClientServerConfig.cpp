@@ -136,4 +136,24 @@ std::future<void> OutlineClient::deleteDataLimitForAllAccessKeysAsync() {
       },
       boost::asio::use_future);
 }
+
+void OutlineClient::setServerName(const std::string& serverName) {
+    setServerNameAsync(serverName).get();
+}
+
+void OutlineClient::setHostName(const std::string& hostName) {
+    setHostNameAsync(hostName).get();
+}
+
+void OutlineClient::setDefaultPort(int port) {
+    setDefaultPortAsync(port).get();
+}
+
+void OutlineClient::setDataLimitForAllAccessKeys(int dataLimitBytes) {
+    setDataLimitForAllAccessKeysAsync(dataLimitBytes).get();
+}
+
+void OutlineClient::deleteDataLimitForAllAccessKeys() {
+    deleteDataLimitForAllAccessKeysAsync().get();
+}
 }  // namespace outline
