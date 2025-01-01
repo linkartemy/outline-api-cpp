@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main() {
-    std::string host = "https://IP:Port/pemgierjg";
+    std::string host = "https://your-outline-server.com/api";
     std::string cert = "";
     int timeout = 10;
 
