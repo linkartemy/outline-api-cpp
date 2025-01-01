@@ -1,16 +1,15 @@
 #ifndef OUTLINECLIENT_H
 #define OUTLINECLIENT_H
 
-#include <iostream>
+#include <future>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-#include "outline/exceptions/OutlineExceptions.h"
 
 #include <boost/asio.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
 
 namespace outline {
@@ -32,7 +31,7 @@ struct UpdateAccessKeyParams {
 /**
  * @brief Класс OutlineClient отвечает за подключение к Outline-серверу.
  */
-class OutlineClient {
+class OutlineClient : public std::enable_shared_from_this<OutlineClient> {
  public:
   /**
      * apiUrl - url for server API
@@ -43,97 +42,131 @@ class OutlineClient {
                 int timeout = 5);
 
   /**
-     * @brief Деструктор. Гарантирует корректное отключение при уничтожении объекта.
+     * @brief Destructor. Stops the io_context and joins the io_thread.
      */
   ~OutlineClient();
+
+  /**
+    * @brief Creates a shared_ptr for handling the lifetime issues
+   */
+  static std::shared_ptr<OutlineClient> create(std::string_view apiUrl,
+                                               std::string_view cert,
+                                               int timeout = 5) {
+    return std::shared_ptr<OutlineClient>(
+        new OutlineClient(apiUrl, cert, timeout));
+  }
 
   /**
      * @brief Returns the access keys.
      * @return the access keys.
      */
-  std::string getAccessKeys();
+  std::future<std::string> getAccessKeysAsync();
   /**
    * @brief Returns the access key by id.
    * @param accessKeyId - the access key id.
    * @return the access key by id.
    */
-  std::string getAccessKey(std::string& accessKeyId);
+  std::future<std::string> getAccessKeyAsync(const std::string& accessKeyId);
   /**
    * @brief Creates the access key.
    * @param params - the parameters for the access key.
    */
-  std::string createAccessKey(CreateAccessKeyParams& params);
+  std::future<std::string> createAccessKeyAsync(
+      const CreateAccessKeyParams& params);
   /**
    * @brief Updates the access key.
    * @param accessKeyId - the access key id.
    * @param params - the parameters for the access key.
    */
-  std::string updateAccessKey(int accessKeyId, UpdateAccessKeyParams& params);
+  std::future<std::string> updateAccessKeyAsync(
+      const std::string& accessKeyId, const UpdateAccessKeyParams& params);
   /**
    * @brief Deletes the access key.
    * @param accessKeyId - the access key id.
    */
-  void deleteAccessKey(std::string& accessKeyId);
+  std::future<void> deleteAccessKeyAsync(const std::string& accessKeyId);
   /**
    * @brief Renames the access key.
    * @param accessKeyId - the access key id.
    * @param newName - the new name for the access key.
    */
-  void renameAccessKey(std::string& accessKeyId, std::string& newName);
+  std::future<void> renameAccessKeyAsync(const std::string& accessKeyId,
+                                         const std::string& newName);
   /**
    * @brief Adds the data limit for the access key.
    * @param accessKeyId - the access key id.
    * @param dataLimitBytes - the data limit in bytes.
    */
-  void addDataLimit(std::string& accessKeyId, int dataLimitBytes);
+  std::future<void> addDataLimitAsync(const std::string& accessKeyId,
+                                      int dataLimitBytes);
   /**
    * @brief Deletes the data limit for the access key.
    * @param accessKeyId - the access key id.
    */
-  void deleteDataLimit(std::string& accessKeyId);
+  std::future<void> deleteDataLimitAsync(const std::string& accessKeyId);
   /**
    * @brief Returns the metrics of the server.
    * @return the metrics of the server.
    */
-  std::string getMetrics();
+  std::future<std::string> getMetricsAsync();
   /**
    * @details Example: name, serverId, metricsEnabled, createdTimestampMs, version, accessKeyDataLimit, portForNewAccessKeys, hostnameForAccessKeys
    * @brief Returns the information about the server.
    * @return the information about the server.
    */
-  std::string getServerInformation();
+  std::future<std::string> getServerInformationAsync();
   /**
    * @brief Sets the server name.
    */
-  void setServerName(std::string& serverName);
+  std::future<void> setServerNameAsync(const std::string& serverName);
   /**
    * @brief Sets the host name for the server.
    * @param hostName - the host name, which will be used for the server.
    */
-  void setHostName(std::string& hostName);
+  std::future<void> setHostNameAsync(const std::string& hostName);
   /**
      * @brief Returns the status of metrics.
      * @return true if metrics are enabled, false otherwise.
      */
-  bool getMetricsStatus();
+  std::future<bool> getMetricsStatusAsync();
   /**
      * @brief Sets the status of metrics.
      * @param status - true if metrics are enabled, false otherwise.
      */
-  void setMetricsStatus(bool status);
+  std::future<void> setMetricsStatusAsync(bool status);
   /**
      * @brief Sets the default port for new access keys.
      * @param port - the default port, which will be used for new access keys.
      */
-  void setDefaultPort(int port);
+  std::future<void> setDefaultPortAsync(int port);
   /**
      * @brief Sets the data limit for all access keys.
      * @param dataLimitBytes - the data limit in bytes.
      */
-  void setDataLimitForAllAccessKeys(int dataLimitBytes);
+  std::future<void> setDataLimitForAllAccessKeysAsync(int dataLimitBytes);
   /**
      * @brief Deletes the data limit for all access keys.
      */
+  std::future<void> deleteDataLimitForAllAccessKeysAsync();
+
+  std::string getAccessKeys();
+  std::string getAccessKey(const std::string& accessKeyId);
+  std::string createAccessKey(const CreateAccessKeyParams& params);
+  std::string updateAccessKey(int accessKeyId,
+                              const UpdateAccessKeyParams& params);
+  void deleteAccessKey(const std::string& accessKeyId);
+  void renameAccessKey(const std::string& accessKeyId,
+                       const std::string& newName);
+  void addDataLimit(const std::string& accessKeyId, int dataLimitBytes);
+  void deleteDataLimit(const std::string& accessKeyId);
+  std::string getMetrics();
+  std::string getServerInformation();
+  bool getMetricsStatus();
+  void setMetricsStatus(bool status);
+  void setServerName(const std::string& serverName);
+  void setHostName(const std::string& hostName);
+  void setDefaultPort(int port);
+  void setDataLimitForAllAccessKeys(int dataLimitBytes);
   void deleteDataLimitForAllAccessKeys();
 
  private:
@@ -141,24 +174,20 @@ class OutlineClient {
   std::string m_cert;
   int m_timeout;
 
-  boost::asio::io_context m_ioContext;
-  std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
-
-  std::pair<int, std::string> doGet(const boost::urls::url& url);
-  std::pair<int, std::string> doHttpsGet(const boost::urls::url& url);
-  std::pair<int, std::string> doPut(const boost::urls::url& url,
-                                    const std::string& body);
-  std::pair<int, std::string> doHttpsPut(const boost::urls::url& url,
-                                         const std::string& body);
-  std::pair<int, std::string> doPost(const boost::urls::url& url,
-                                     const std::string& body);
-  std::pair<int, std::string> doHttpsPost(const boost::urls::url& url,
-                                          const std::string& body);
-  std::pair<int, std::string> doDelete(const boost::urls::url& url);
-  std::pair<int, std::string> doHttpsDelete(const boost::urls::url& url);
-
   boost::asio::ssl::context m_sslContext;
-  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> m_sslStream;
+  boost::asio::io_context m_ioContext;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+      m_workGuard;
+  std::thread m_ioThread;
+
+  boost::asio::awaitable<std::pair<int, std::string>> doGetAsync(
+      const boost::urls::url& url);
+  boost::asio::awaitable<std::pair<int, std::string>> doPostAsync(
+      const boost::urls::url& url, const std::string& body);
+  boost::asio::awaitable<std::pair<int, std::string>> doPutAsync(
+      const boost::urls::url& url, const std::string& body);
+  boost::asio::awaitable<std::pair<int, std::string>> doDeleteAsync(
+      const boost::urls::url& url);
 };
 
 }  // namespace outline

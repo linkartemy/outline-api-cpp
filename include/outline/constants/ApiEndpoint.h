@@ -29,7 +29,7 @@ struct Endpoints {
   static constexpr std::string_view SetMetricsStatus = "/metrics/enabled";
   static constexpr std::string_view SetDefaultPort = "/server/port-for-new-access-keys";
   static constexpr std::string_view SetDataLimitForAllAccessKeys = "/server/access-key-data-limit";
-  static constexpr std::string_view deleteDataLimitForAllAccessKeys = "/server/access-key-data-limit";
+  static constexpr std::string_view DeleteDataLimitForAllAccessKeys = "/server/access-key-data-limit";
 };
 
 }  // namespace api

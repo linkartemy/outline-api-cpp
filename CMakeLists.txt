@@ -1,57 +1,31 @@
-cmake_minimum_required(VERSION 3.10)
-project(outline_vpn_api_cpp VERSION 1.0.0 LANGUAGES CXX)
+CXX = g++
+CXXFLAGS = -std=c++20 -Wall -O2
+INCLUDES = -Iinclude
+LIBS = -L. -loutline -lboost_system -lboost_json -lboost_url -lssl -lcrypto -lpthread
 
-# Set C++ standard and compiler
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_COMPILER "g++-13")
-set(CMAKE_CXX_FLAGS "-Wall -O2")
+SRC_DIR = src
+OBJ_DIR = obj
 
-# Поиск и подключение зависимостей
-find_package(CURL REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system asio json url)
-find_package(fmt REQUIRED)
+CLIENT_SRC = $(shell find $(SRC_DIR) -name "*.cpp")
 
-enable_testing()
-add_subdirectory(tests)
+CLIENT_OBJ = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CLIENT_SRC))
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/include/exceptions)
+all: liboutline.a example
 
-if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(outline_vpn_api ${Boost_LIBRARIES})
-endif()
+liboutline.a: $(CLIENT_OBJ)
+	ar rcs liboutline.a $(CLIENT_OBJ)
 
-# Подключение заголовочных файлов
-include_directories(${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Source files
-set(SOURCES
-src/OutlineClient.cpp
-)
+example: examples/basic/main.cpp liboutline.a
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o example examples/basic/main.cpp liboutline.a $(LIBS)
 
-# Создание основной библиотеки
-add_library(outline_vpn_api STATIC ${SOURCES})
+run: example
+	./example
 
-# Линковка зависимостей
-target_link_libraries(outline_vpn_api PRIVATE
-    ${CURL_LIBRARIES}
-    OpenSSL::SSL
-    OpenSSL::Crypto
+clean:
+	rm -rf liboutline.a example obj
 
-    Boost::system
-    Boost::asio
-    Boost::json
-    Boost::url
-)
-
-add_executable(example examples/basic/main.cpp)
-add_executable(test examples/test/main.cpp)
-target_include_directories(example PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/include)
-
-# Настройка тестов
-enable_testing()
-add_subdirectory(tests)
+.PHONY: all clean run
