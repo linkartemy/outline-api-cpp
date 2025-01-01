@@ -13,6 +13,9 @@ find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system asio json url)
 find_package(fmt REQUIRED)
 
+enable_testing()
+add_subdirectory(tests)
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/exceptions)
 
